@@ -1,5 +1,7 @@
 package com.example.bankclientbasic.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -9,6 +11,7 @@ public class Customer {
     private String name;
     private String email;
     private Integer age;
+    @JsonManagedReference
     private List<Account> accounts;
 
     public Customer(String name, String email, Integer age) {

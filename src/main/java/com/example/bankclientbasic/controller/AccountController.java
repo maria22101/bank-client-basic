@@ -1,22 +1,37 @@
 package com.example.bankclientbasic.controller;
 
+import com.example.bankclientbasic.model.Account;
 import com.example.bankclientbasic.service.AccountService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
+@RestController
+@RequestMapping("/bank/v1/accounts")
 public class AccountController {
 
-    private AccountService service = new AccountService();
+    private final AccountService service;
 
-    public void replenishAccountByNumber(String accountNumber, Double sum) {
-
+    @Autowired
+    public AccountController(AccountService service) {
+        this.service = service;
     }
 
-    public void withdrawSumFromAccountByNumber(String accountNumber, Double sum) {
-
+    @PutMapping("/{number}/add")
+    public Account addSumToAccountByNumber(@PathVariable String number,
+                                            @RequestParam double sum) {
+        return service.addSum(number, sum);
     }
 
-    public void transferBetweenAccounts(String accountNumberFrom,
-                                        String accountNumberTo,
-                                        Double sum) {
+    @PutMapping("/{number}/withdraw")
+    public Account withdrawSumFromAccountByNumber(@PathVariable String number,
+                                                  @RequestParam double sum) {
+        return service.withdrawSum(number, sum);
+    }
 
+    @PutMapping("/{number}/{numberTo}/transfer")
+    public void transferBetweenAccounts(@PathVariable (value = "number") String accountNumberFrom,
+                                        @PathVariable (value = "numberTo") String accountNumberTo,
+                                        @RequestParam double sum) {
+        service.transferBetweenAccounts(accountNumberFrom, accountNumberTo, sum);
     }
 }
