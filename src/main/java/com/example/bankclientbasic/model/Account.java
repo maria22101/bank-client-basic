@@ -1,5 +1,7 @@
 package com.example.bankclientbasic.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import java.util.Objects;
 import java.util.UUID;
 
@@ -8,12 +10,12 @@ public class Account {
     private String number;
     private Currency currency;
     private Double balance;
+    @JsonBackReference
     private Customer customer;
 
     public Account(Currency currency, Customer customer) {
         this.currency = currency;
         this.customer = customer;
-
         balance = (double) 0;
         number = UUID.randomUUID().toString();
     }
