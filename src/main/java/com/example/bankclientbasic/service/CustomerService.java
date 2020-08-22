@@ -13,15 +13,11 @@ import java.util.List;
 @Service
 public class CustomerService implements GeneralService<Customer>{
 
-    private final CustomerDao customerDao;
-    private final AccountDao accountDao;
+    @Autowired
+    private CustomerDao customerDao;
 
     @Autowired
-    public CustomerService(CustomerDao customerDao,
-                           AccountDao accountDao) {
-        this.customerDao = customerDao;
-        this.accountDao = accountDao;
-    }
+    private AccountDao accountDao;
 
     @Override
     public Customer save(Customer obj) {
@@ -58,36 +54,24 @@ public class CustomerService implements GeneralService<Customer>{
         return customerDao.getOne(id);
     }
 
-    public Customer createCustomer(Customer customer) {
-        return save(customer);
-    }
-
     public Customer updatePersonalData(Customer incomingCustomer) {
         return customerDao.updateExisting(incomingCustomer);
     }
 
     public void createAccount(int customerId, String currency) {
-        Customer newAccountOwner = getCustomerIfPreset(customerId);
+        Customer newAccountOwner = customerDao.getOne(customerId);
         Account newAccount = new Account(Currency.valueOf(currency), newAccountOwner);
         newAccountOwner.getAccounts().add(newAccount);
 
         customerDao.updateExisting(newAccountOwner);
-        accountDao.save(newAccount);
     }
 
     public void closeAccount(int customerId, int accountId) {
-        Customer customer = getCustomerIfPreset(customerId);
+        Customer customer = customerDao.getOne(customerId);
         Account accountToClose = accountDao.getOne(accountId);
         customer.getAccounts().remove(accountToClose);
 
         customerDao.updateExisting(customer);
-        accountDao.delete(accountToClose);
-    }
-
-    private Customer getCustomerIfPreset(int id) {
-        if(getById(id) == null) {
-            throw new RuntimeException();
-        }
-        return getById(id);
     }
 }
+

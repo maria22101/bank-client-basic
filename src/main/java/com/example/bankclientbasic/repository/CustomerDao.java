@@ -2,79 +2,63 @@ package com.example.bankclientbasic.repository;
 
 import com.example.bankclientbasic.model.Customer;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Repository
-public class CustomerDao implements GeneralDao<Customer>{
+@Transactional
+public class CustomerDao implements GeneralDao<Customer> {
 
-    List<Customer> storage = new ArrayList<>();
-    private final AtomicLong counter = new AtomicLong();
+    @PersistenceContext
+    private EntityManager em;
 
     @Override
     public Customer save(Customer obj) {
-        obj.setId(counter.incrementAndGet());
-        storage.add(obj);
+        em.persist(obj);
         return obj;
     }
 
     @Override
     public boolean delete(Customer obj) {
-        if (storage.contains(obj)) {
-            storage.remove(obj);
-            return true;
-        }
-        return false;
+        em.remove(obj);
+        return true;
     }
 
     @Override
     public void deleteAll(List<Customer> entities) {
-        if (storage.isEmpty()) {
-            return;
-        }
-        storage.removeAll(entities);
+        entities.forEach(c -> deleteById(c.getId()));
     }
 
     @Override
     public void saveAll(List<Customer> entities) {
-        storage.addAll(entities);
+        entities.forEach(c -> save(c));
     }
 
     @Override
     public List<Customer> findAll() {
-        return storage;
+        TypedQuery<Customer> namedQuery = em.createNamedQuery("Customer.getAll", Customer.class);
+        return namedQuery.getResultList();
     }
 
     @Override
     public boolean deleteById(long id) {
-        Customer customerToRemove = getOne(id);
-        if(customerToRemove == null) {
-            return false;
-        }
-        storage.remove(customerToRemove);
+        em.remove(getOne(id));
         return true;
     }
 
     @Override
     public Customer getOne(long id) {
-        Optional<Customer> customer = storage
-                .stream()
-                .filter(c -> c.getId() == id)
-                .findFirst();
-
-        return customer.orElse(null);
+        return em.find(Customer.class, id);
     }
 
     public Customer updateExisting(Customer customer) {
-        Optional<Customer> customerToUpdate = storage
-                .stream()
-                .filter(c -> c.getId().equals(customer.getId()))
-                .findFirst();
-
-        customerToUpdate.ifPresent(c -> storage.set(storage.indexOf(c), customer));
+        em.merge(customer);
         return customer;
     }
 }
+
+

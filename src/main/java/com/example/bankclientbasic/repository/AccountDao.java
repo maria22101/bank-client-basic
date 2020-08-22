@@ -1,80 +1,64 @@
 package com.example.bankclientbasic.repository;
 
 import com.example.bankclientbasic.model.Account;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Repository
+@Transactional
 public class AccountDao implements GeneralDao<Account> {
 
-    List<Account> storage = new ArrayList<>();
-    private final AtomicLong counter = new AtomicLong();
+    @Autowired
+    private EntityManager em;
 
     @Override
     public Account save(Account obj) {
-        obj.setId(counter.incrementAndGet());
-        storage.add(obj);
+        em.persist(obj);
         return obj;
     }
 
     @Override
     public boolean delete(Account obj) {
-        if (storage.contains(obj)) {
-            storage.remove(obj);
-            return true;
-        }
-        return false;
+        em.remove(obj);
+        return true;
     }
 
     @Override
     public void deleteAll(List<Account> entities) {
-        if (storage.isEmpty()) {
-            return;
-        }
-        storage.removeAll(entities);
+        entities.forEach(a -> deleteById(a.getId()));
     }
 
     @Override
     public void saveAll(List<Account> entities) {
-        storage.addAll(entities);
+        entities.forEach(a -> save(a));
     }
 
     @Override
     public List<Account> findAll() {
-        return storage;
+        TypedQuery<Account> namedQuery = em.createNamedQuery("Account.getAll", Account.class);
+        return namedQuery.getResultList();
     }
 
     @Override
     public boolean deleteById(long id) {
-        Account accountToRemove = getOne(id);
-        if(accountToRemove == null) {
-            return false;
-        }
-        storage.remove(accountToRemove);
+        em.remove(getOne(id));
         return true;
     }
 
     @Override
     public Account getOne(long id) {
-        Optional<Account> account = storage
-                .stream()
-                .filter(a -> a.getId() == id)
-                .findFirst();
-
-        return account.orElse(null);
+        return em.find(Account.class, id);
     }
 
     public Account updateExisting(Account account) {
-        Optional<Account> accountToUpdate = storage
-                .stream()
-                .filter(a -> a.getId().equals(account.getId()))
-                .findFirst();
-
-        accountToUpdate.ifPresent(a -> storage.set(storage.indexOf(a), account));
+        em.merge(account);
         return account;
     }
 }
+
+
