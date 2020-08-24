@@ -13,14 +13,16 @@ spring:
   profiles: prod
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/springhibernatedb
-    username: root
-    password: 12345678
+    url: jdbc:mysql://remotemysql.com:3306/xKisX4cejF
+    username: xKisX4cejF
+    password: dTqGwLj3TL
+
+    initialization-mode: always
 
   jpa:
     hibernate:
       show_sql: true
-      ddl-auto: create-drop
-      dialect: org.hibernate.dialect.MySQL5Dialect
+      ddl-auto: create
+      dialect: org.hibernate.dialect.MySQL8InnoDBDialect
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
