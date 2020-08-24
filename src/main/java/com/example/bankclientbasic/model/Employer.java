@@ -13,10 +13,12 @@ public class Employer extends AbstractEntity {
     private String address;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
-    @JoinTable(name = "employers_customers",
+    @JoinTable(
+            name = "employers_customers",
             joinColumns = @JoinColumn(name = "employer_id"),
-            inverseJoinColumns = @JoinColumn(name = "customer_id"))
-    private Set<Customer> employees;
+            inverseJoinColumns = @JoinColumn(name = "customer_id")
+    )
+    private Set<Customer> customers;
 
     public Employer(String name, String address) {
         this.name = name;
@@ -42,12 +44,12 @@ public class Employer extends AbstractEntity {
         this.address = address;
     }
 
-    public Set<Customer> getEmployees() {
-        return employees;
+    public Set<Customer> getCustomers() {
+        return customers;
     }
 
-    public void setEmployees(Set<Customer> employees) {
-        this.employees = employees;
+    public void setCustomers(Set<Customer> customers) {
+        this.customers = customers;
     }
 
     @Override
@@ -68,7 +70,7 @@ public class Employer extends AbstractEntity {
         return "Employer{" +
                 "name='" + name + '\'' +
                 ", address='" + address + '\'' +
-                ", employees=" + employees +
+                ", customers=" + customers +
                 '}';
     }
 }

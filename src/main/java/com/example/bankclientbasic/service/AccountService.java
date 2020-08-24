@@ -54,7 +54,8 @@ public class AccountService implements GeneralService<Account> {
     public Account addSum(String accountNumber, Double sum) {
         Account account = getAccountByNumber(accountNumber)
                 .orElseThrow(RuntimeException::new);
-        Double newBalance = account.getBalance() + sum;
+        Double currentBalance = account.getBalance();
+        Double newBalance = currentBalance == null ? sum : (currentBalance + sum);
         account.setBalance(newBalance);
         return accountDao.updateExisting(account);
     }

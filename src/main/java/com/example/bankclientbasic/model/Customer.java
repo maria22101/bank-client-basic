@@ -25,7 +25,7 @@ public class Customer extends AbstractEntity {
     @OneToMany(mappedBy = "customer", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Account> accounts;
 
-    @ManyToMany(mappedBy = "employees")
+    @ManyToMany(mappedBy = "customers")
     private Set<Employer> employers;
 
     public Customer(String name, String email, Integer age) {
