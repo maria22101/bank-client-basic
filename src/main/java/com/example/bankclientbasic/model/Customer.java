@@ -1,12 +1,18 @@
 package com.example.bankclientbasic.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
+
+@NoArgsConstructor
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
+@ToString
 
 @Entity
 @Table(name = "customers")
@@ -15,6 +21,7 @@ import java.util.Set;
 })
 public class Customer extends AbstractEntity {
 
+    @EqualsAndHashCode.Include
     private String name;
 
     private String email;
@@ -35,63 +42,6 @@ public class Customer extends AbstractEntity {
 
         accounts = new ArrayList<>();
     }
-
-    public Customer() {
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public Integer getAge() {
-        return age;
-    }
-
-    public void setAge(Integer age) {
-        this.age = age;
-    }
-
-    public List<Account> getAccounts() {
-        return accounts;
-    }
-
-    public void setAccounts(List<Account> accounts) {
-        this.accounts = accounts;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Customer customer = (Customer) o;
-        return name.equals(customer.name);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name);
-    }
-
-    @Override
-    public String toString() {
-        return "Customer{" +
-                "name='" + name + '\'' +
-                ", email='" + email + '\'' +
-                ", age=" + age +
-                ", accounts=" + accounts +
-                '}';
-    }
 }
+
 
