@@ -2,17 +2,31 @@ package com.example.bankclientbasic.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
-public class Customer {
-    private Long id;
+@Entity
+@Table(name = "customers")
+@NamedQueries({
+        @NamedQuery(name = "Customer.getAll", query = "SELECT c from Customer c")
+})
+public class Customer extends AbstractEntity {
+
     private String name;
+
     private String email;
+
     private Integer age;
+
     @JsonManagedReference
+    @OneToMany(mappedBy = "customer", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Account> accounts;
+
+    @ManyToMany(mappedBy = "customers")
+    private Set<Employer> employers;
 
     public Customer(String name, String email, Integer age) {
         this.name = name;
@@ -22,12 +36,7 @@ public class Customer {
         accounts = new ArrayList<>();
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    public Customer() {
     }
 
     public String getName() {
@@ -67,23 +76,22 @@ public class Customer {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Customer customer = (Customer) o;
-        return id.equals(customer.id) &&
-                name.equals(customer.name);
+        return name.equals(customer.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name);
+        return Objects.hash(name);
     }
 
     @Override
     public String toString() {
         return "Customer{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
+                "name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 ", age=" + age +
                 ", accounts=" + accounts +
                 '}';
     }
 }
+

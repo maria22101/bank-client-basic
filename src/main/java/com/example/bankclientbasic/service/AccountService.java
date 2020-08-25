@@ -13,15 +13,8 @@ import java.util.Optional;
 @Service
 public class AccountService implements GeneralService<Account> {
 
-    private final AccountDao accountDao;
-    private final CustomerDao customerDao;
-
     @Autowired
-    public AccountService(AccountDao accountDao,
-                          CustomerDao customerDao) {
-        this.accountDao = accountDao;
-        this.customerDao = customerDao;
-    }
+    private AccountDao accountDao;
 
     @Override
     public Account save(Account obj) {
@@ -61,11 +54,9 @@ public class AccountService implements GeneralService<Account> {
     public Account addSum(String accountNumber, Double sum) {
         Account account = getAccountByNumber(accountNumber)
                 .orElseThrow(RuntimeException::new);
-        Double newBalance = account.getBalance() + sum;
+        Double currentBalance = account.getBalance();
+        Double newBalance = currentBalance == null ? sum : (currentBalance + sum);
         account.setBalance(newBalance);
-
-        updateCustomerWithUpdatedAccount(account);
-
         return accountDao.updateExisting(account);
     }
 
@@ -77,9 +68,6 @@ public class AccountService implements GeneralService<Account> {
         if (currentBalance > sum) {
             Double newBalance = currentBalance - sum;
             account.setBalance(newBalance);
-
-            updateCustomerWithUpdatedAccount(account);
-
             return accountDao.updateExisting(account);
 
         } else {
@@ -95,17 +83,12 @@ public class AccountService implements GeneralService<Account> {
                 .orElseThrow(RuntimeException::new);
         Account accountTo = getAccountByNumber(accountNumberTo)
                 .orElseThrow(RuntimeException::new);
-
         Double accountFromBalance = accountFrom.getBalance();
         Double accountToBalance = accountTo.getBalance();
 
         if (accountFromBalance > sum) {
             accountFrom.setBalance(accountFromBalance - sum);
             accountTo.setBalance(accountToBalance + sum);
-
-            updateCustomerWithUpdatedAccount(accountFrom);
-            updateCustomerWithUpdatedAccount(accountTo);
-
             accountDao.updateExisting(accountFrom);
             accountDao.updateExisting(accountTo);
 
@@ -120,14 +103,5 @@ public class AccountService implements GeneralService<Account> {
                 .filter(a -> a.getNumber().equals(accountNumber))
                 .findFirst();
     }
-
-    private void updateCustomerWithUpdatedAccount(Account updatedAccount) {
-        int accountOwnerId = updatedAccount.getCustomer().getId().intValue();
-        Customer customer = customerDao.getOne(accountOwnerId);
-        List<Account> customerAccounts = customer.getAccounts();
-        int index = customerAccounts.indexOf(updatedAccount);
-        customerAccounts.set(index, updatedAccount);
-
-        customerDao.updateExisting(customer);
-    }
 }
+

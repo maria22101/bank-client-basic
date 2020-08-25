@@ -9,12 +9,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/bank/v1/accounts")
 public class AccountController {
 
-    private final AccountService service;
-
     @Autowired
-    public AccountController(AccountService service) {
-        this.service = service;
-    }
+    private AccountService service;
 
     @PutMapping("/{number}/add")
     public Account addSumToAccountByNumber(@PathVariable String number,
@@ -35,3 +31,4 @@ public class AccountController {
         service.transferBetweenAccounts(accountNumberFrom, accountNumberTo, sum);
     }
 }
+

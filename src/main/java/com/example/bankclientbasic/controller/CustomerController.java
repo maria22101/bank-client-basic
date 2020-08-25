@@ -11,12 +11,8 @@ import java.util.List;
 @RequestMapping("/bank/v1/customers")
 public class CustomerController {
 
-    private final CustomerService service;
-
     @Autowired
-    public CustomerController(CustomerService service) {
-        this.service = service;
-    }
+    private CustomerService service;
 
     @GetMapping("/{id}")
     public Customer getCustomerInfoById(@PathVariable int id) {
@@ -30,7 +26,7 @@ public class CustomerController {
 
     @PostMapping
     public Customer createCustomer(@RequestBody Customer customer) {
-        return service.createCustomer(customer);
+        return service.save(customer);
     }
 
     @PutMapping
@@ -55,3 +51,4 @@ public class CustomerController {
         service.closeAccount(customerId, accountId);
     }
 }
+
