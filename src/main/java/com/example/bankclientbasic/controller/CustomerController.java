@@ -31,7 +31,7 @@ public class CustomerController {
 
     @PutMapping
     public Customer updateCustomerPersonalData(@RequestBody Customer customer) {
-        return service.updatePersonalData(customer);
+        return service.save(customer);
     }
 
     @DeleteMapping("/{id}")

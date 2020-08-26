@@ -3,8 +3,8 @@ package com.example.bankclientbasic.service;
 import com.example.bankclientbasic.model.Account;
 import com.example.bankclientbasic.model.Currency;
 import com.example.bankclientbasic.model.Customer;
-import com.example.bankclientbasic.repository.AccountDao;
-import com.example.bankclientbasic.repository.CustomerDao;
+import com.example.bankclientbasic.repository.AccountRepository;
+import com.example.bankclientbasic.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,64 +14,57 @@ import java.util.List;
 public class CustomerService implements GeneralService<Customer>{
 
     @Autowired
-    private CustomerDao customerDao;
+    private CustomerRepository customerRepository;
 
     @Autowired
-    private AccountDao accountDao;
+    private AccountRepository accountRepository;
 
     @Override
     public Customer save(Customer obj) {
-        return customerDao.save(obj);
+        return customerRepository.save(obj);
     }
 
     @Override
     public boolean delete(Customer obj) {
-        return customerDao.delete(obj);
+        customerRepository.delete(obj);
+        return true;
     }
 
     @Override
     public void deleteAll(List<Customer> entities) {
-        customerDao.deleteAll(entities);
+        customerRepository.deleteAll(entities);
     }
 
     @Override
     public void saveAll(List<Customer> entities) {
-        customerDao.saveAll(entities);
+        customerRepository.saveAll(entities);
     }
 
     @Override
     public List<Customer> getAll() {
-        return customerDao.findAll();
+        return (List<Customer>)customerRepository.findAll();
     }
 
     @Override
     public boolean deleteById(long id) {
-        return customerDao.deleteById(id);
+        customerRepository.deleteById(id);
+        return true;
     }
 
     @Override
     public Customer getById(long id) {
-        return customerDao.getOne(id);
-    }
-
-    public Customer updatePersonalData(Customer incomingCustomer) {
-        return customerDao.updateExisting(incomingCustomer);
+        return customerRepository.findById(id)
+                .orElseThrow(RuntimeException::new);
     }
 
     public void createAccount(int customerId, String currency) {
-        Customer newAccountOwner = customerDao.getOne(customerId);
+        Customer newAccountOwner = getById(customerId);
         Account newAccount = new Account(Currency.valueOf(currency), newAccountOwner);
-        newAccountOwner.getAccounts().add(newAccount);
-
-        customerDao.updateExisting(newAccountOwner);
+        accountRepository.save(newAccount);
     }
 
     public void closeAccount(int customerId, int accountId) {
-        Customer customer = customerDao.getOne(customerId);
-        Account accountToClose = accountDao.getOne(accountId);
-        customer.getAccounts().remove(accountToClose);
-
-        customerDao.updateExisting(customer);
+        accountRepository.deleteById((long) accountId);
     }
 }
 
