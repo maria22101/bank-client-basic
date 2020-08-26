@@ -35,12 +35,11 @@ VALUES ('c3e978af-4fda-4354-952b-20fa43e5869a', 'USD', 5);
 INSERT INTO `accounts` (`number`, `currency`, `customer_id`)
 VALUES ('a5ca46ba-b7a6-4821-b800-4e56a30df79e', 'UAH', 5);
 
-INSERT INTO `employers_customers` (`employer_id`, `customer_id`) VALUES (1, 1);
-INSERT INTO `employers_customers` (`employer_id`, `customer_id`) VALUES (1, 2);
-INSERT INTO `employers_customers` (`employer_id`, `customer_id`) VALUES (2, 3);
-INSERT INTO `employers_customers` (`employer_id`, `customer_id`) VALUES (2, 4);
-INSERT INTO `employers_customers` (`employer_id`, `customer_id`) VALUES (2, 5);
-INSERT INTO `employers_customers` (`employer_id`, `customer_id`) VALUES (3, 1);
-INSERT INTO `employers_customers` (`employer_id`, `customer_id`) VALUES (3, 3);
-INSERT INTO `employers_customers` (`employer_id`, `customer_id`) VALUES (3, 4);
-INSERT INTO `employers_customers` (`employer_id`, `customer_id`) VALUES (3, 5);
+INSERT INTO `customers_employers` (`customer_id`, `employer_id`) VALUES (1, 1);
+INSERT INTO `customers_employers` (`customer_id`, `employer_id`) VALUES (2, 1);
+INSERT INTO `customers_employers` (`customer_id`, `employer_id`) VALUES (2, 3);
+INSERT INTO `customers_employers` (`customer_id`, `employer_id`) VALUES (3, 2);
+INSERT INTO `customers_employers` (`customer_id`, `employer_id`) VALUES (3, 3);
+INSERT INTO `customers_employers` (`customer_id`, `employer_id`) VALUES (4, 1);
+INSERT INTO `customers_employers` (`customer_id`, `employer_id`) VALUES (5, 1);
+INSERT INTO `customers_employers` (`customer_id`, `employer_id`) VALUES (5, 3);

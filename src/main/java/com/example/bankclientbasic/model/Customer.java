@@ -5,6 +5,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -29,10 +30,15 @@ public class Customer extends AbstractEntity {
     private Integer age;
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "customer", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Account> accounts;
 
-    @ManyToMany(mappedBy = "customers")
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @JoinTable(
+            name = "customers_employers",
+            joinColumns = @JoinColumn(name = "customer_id"),
+            inverseJoinColumns = @JoinColumn(name = "employer_id")
+    )
     private Set<Employer> employers;
 
     public Customer(String name, String email, Integer age) {
@@ -41,6 +47,7 @@ public class Customer extends AbstractEntity {
         this.age = age;
 
         accounts = new ArrayList<>();
+        employers = new HashSet<>();
     }
 }
 
