@@ -23,7 +23,6 @@ public class Employer extends AbstractEntity {
     @EqualsAndHashCode.Include
     private String address;
 
-    @JsonBackReference
     @ManyToMany(mappedBy = "employers", fetch = FetchType.LAZY)
     private Set<Customer> customers;
 

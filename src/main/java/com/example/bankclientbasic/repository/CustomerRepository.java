@@ -11,4 +11,5 @@ import java.util.Optional;
 @Repository
 @Transactional
 public interface CustomerRepository extends CrudRepository<Customer, Long> {
+    Optional<Customer> findCustomersByNameAndEmail(String name, String email);
 }

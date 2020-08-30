@@ -1,9 +1,12 @@
 package com.example.bankclientbasic.controller;
 
+import com.example.bankclientbasic.dto.EmployerRequestDto;
+import com.example.bankclientbasic.dto.EmployerResponseDto;
 import com.example.bankclientbasic.model.Customer;
 import com.example.bankclientbasic.model.Employer;
 import com.example.bankclientbasic.service.EmployerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,28 +19,28 @@ public class EmployerController {
     private EmployerService service;
 
     @GetMapping("/{id}")
-    public Employer getEmployerById(@PathVariable int id) {
-        return service.getById(id);
+    public EmployerResponseDto getEmployerById(@PathVariable int id) {
+        return service.getEmployerResponseDtoById(id);
     }
 
     @GetMapping
-    public List<Employer> getAllEmployers() {
-        return service.getAll();
+    public List<EmployerResponseDto> getAllEmployers() {
+        return service.getAllEmployerResponseDTOs();
     }
 
     @PostMapping
-    public Employer createEmployer(@RequestBody Employer employer) {
-        return service.save(employer);
+    public EmployerResponseDto createEmployer(@Validated @RequestBody EmployerRequestDto dto) {
+        return service.createEmployer(dto);
     }
 
     @PutMapping
-    public Employer updateEmployerInfo(@RequestBody Employer employer) {
-        return service.updateExisting(employer);
+    public EmployerResponseDto updateEmployerInfo(@Validated @RequestBody EmployerRequestDto dto) {
+        return service.updateEmployerInfo(dto);
     }
 
     @DeleteMapping("/{id}")
     public void deleteEmployerById(@PathVariable int id) {
         service.deleteById(id);
     }
-
 }
+

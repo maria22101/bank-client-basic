@@ -1,5 +1,7 @@
 package com.example.bankclientbasic.service;
 
+import com.example.bankclientbasic.dto.AccountResponseDto;
+import com.example.bankclientbasic.mapper.MapperFromAndToDTOs;
 import com.example.bankclientbasic.model.Account;
 import com.example.bankclientbasic.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,9 @@ public class AccountService implements GeneralService<Account> {
 
     @Autowired
     private AccountRepository accountRepository;
+
+    @Autowired
+    private MapperFromAndToDTOs mapper;
 
     @Override
     public Account save(Account obj) {
@@ -99,6 +104,16 @@ public class AccountService implements GeneralService<Account> {
         } else {
             throw new RuntimeException();
         }
+    }
+
+    public AccountResponseDto addSumToAccountNumber(String number, Double sum) {
+        Account account = addSum(number, sum);
+        return mapper.toAccountDto(account);
+    }
+
+    public AccountResponseDto withdrawSumFromAccountByNumber(String number, Double sum) {
+        Account account = withdrawSum(number, sum);
+        return mapper.toAccountDto(account);
     }
 }
 

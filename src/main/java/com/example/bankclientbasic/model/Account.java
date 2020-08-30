@@ -30,15 +30,14 @@ public class Account {
 
     private Double balance;
 
-    @JsonBackReference
     @ManyToOne(optional = false, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
-    public Account(Currency currency, Customer customer) {
+    public Account(Currency currency, Customer customer, Double balance) {
         this.currency = currency;
         this.customer = customer;
-        balance = (double) 0;
+        this.balance = balance;
         number = UUID.randomUUID().toString();
     }
 }
