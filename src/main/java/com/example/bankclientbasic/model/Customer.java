@@ -17,22 +17,25 @@ import java.util.Set;
 
 @Entity
 @Table(name = "customers")
-@NamedQueries({
-        @NamedQuery(name = "Customer.getAll", query = "SELECT c from Customer c")
-})
 public class Customer extends AbstractEntity {
 
     @EqualsAndHashCode.Include
     private String name;
 
+    @EqualsAndHashCode.Include
     private String email;
 
     private Integer age;
+
+    private String password;
+
+    private String phoneNumber;
 
     @JsonManagedReference
     @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Account> accounts;
 
+    @JsonManagedReference
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable(
             name = "customers_employers",

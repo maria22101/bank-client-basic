@@ -10,26 +10,24 @@ import java.util.UUID;
 @NoArgsConstructor
 @Getter
 @Setter
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString
 
 @Entity
 @Table(name = "accounts")
-@NamedQueries({
-        @NamedQuery(name = "Account.getAll", query = "SELECT a from Account a")
-})
 public class Account {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @EqualsAndHashCode.Include
     private String number;
 
+    @EqualsAndHashCode.Include
     @Enumerated(EnumType.STRING)
     private Currency currency;
 
-    @EqualsAndHashCode.Exclude
     private Double balance;
 
     @JsonBackReference
