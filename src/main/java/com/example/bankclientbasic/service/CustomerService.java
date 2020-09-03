@@ -9,6 +9,9 @@ import com.example.bankclientbasic.model.Customer;
 import com.example.bankclientbasic.repository.AccountRepository;
 import com.example.bankclientbasic.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
@@ -103,6 +106,12 @@ public class CustomerService implements GeneralService<Customer> {
         return allCustomers.stream()
                 .map(mapper::toCustomerDto)
                 .collect(Collectors.toList());
+    }
+
+    public Page<CustomerResponseDto> getAllCustomerResponseDTOs(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Customer> allCustomers =  customerRepository.findAll(pageable);
+        return allCustomers.map(mapper::toCustomerDto);
     }
 
     public CustomerResponseDto createCustomer(CustomerRequestDto dto) {
