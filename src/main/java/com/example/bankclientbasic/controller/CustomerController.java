@@ -1,37 +1,47 @@
 package com.example.bankclientbasic.controller;
 
-import com.example.bankclientbasic.model.Customer;
+import com.example.bankclientbasic.dto.AccountRequestDto;
+import com.example.bankclientbasic.dto.CustomerRequestDto;
+import com.example.bankclientbasic.dto.CustomerResponseDto;
 import com.example.bankclientbasic.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/bank/v1/customers")
 public class CustomerController {
+    private static final int DEFAULT_USERS_PER_PAGE = 2;
+    private static final int DEFAULT_START_PAGE = 0;
 
     @Autowired
     private CustomerService service;
 
     @GetMapping("/{id}")
-    public Customer getCustomerInfoById(@PathVariable int id) {
-        return service.getById(id);
+    public CustomerResponseDto getCustomerInfoById(@PathVariable int id) {
+        return service.getCustomerResponseDtoById(id);
     }
 
-    @GetMapping
-    public List<Customer> getAllCustomersInfo() {
-        return service.getAll();
+    @GetMapping("/page/all")
+    public Page<CustomerResponseDto> getAllCustomersInfo() {
+        return service.getAllCustomerResponseDTOs(DEFAULT_START_PAGE, DEFAULT_USERS_PER_PAGE);
+    }
+
+    @GetMapping("/page/{page}/size/{size}")
+    public Page<CustomerResponseDto> getAllCustomersInfo(@PathVariable int page,
+                                                         @PathVariable int size) {
+        return service.getAllCustomerResponseDTOs(page, size);
     }
 
     @PostMapping
-    public Customer createCustomer(@RequestBody Customer customer) {
-        return service.save(customer);
+    public CustomerResponseDto createCustomer(@Validated @RequestBody CustomerRequestDto dto) {
+        return service.createCustomer(dto);
     }
 
     @PutMapping
-    public Customer updateCustomerPersonalData(@RequestBody Customer customer) {
-        return service.updatePersonalData(customer);
+    public CustomerResponseDto updateCustomerPersonalData(@Validated @RequestBody CustomerRequestDto dto) {
+        return service.updateCustomerPersonalData(dto);
     }
 
     @DeleteMapping("/{id}")
@@ -41,14 +51,14 @@ public class CustomerController {
 
     @PostMapping("/{id}/accounts")
     public void createAccount(@PathVariable int id,
-                              @RequestParam String currency) {
-        service.createAccount(id, currency);
+                              @Validated @RequestBody AccountRequestDto dto) {
+        service.createAccount(id, dto);
     }
 
-    @DeleteMapping("/{customerId}/accounts/{accountId}")
+    @DeleteMapping("/{customerId}/accounts/{accountNumber}")
     public void closeAccount(@PathVariable int customerId,
-                             @PathVariable int accountId) {
-        service.closeAccount(customerId, accountId);
+                             @PathVariable String accountNumber) {
+        service.closeAccount(customerId, accountNumber);
     }
 }
 

@@ -1,77 +1,143 @@
 package com.example.bankclientbasic.service;
 
+import com.example.bankclientbasic.dto.AccountRequestDto;
+import com.example.bankclientbasic.dto.CustomerRequestDto;
+import com.example.bankclientbasic.dto.CustomerResponseDto;
+import com.example.bankclientbasic.mapper.MapperFromAndToDTOs;
 import com.example.bankclientbasic.model.Account;
-import com.example.bankclientbasic.model.Currency;
 import com.example.bankclientbasic.model.Customer;
-import com.example.bankclientbasic.repository.AccountDao;
-import com.example.bankclientbasic.repository.CustomerDao;
+import com.example.bankclientbasic.repository.AccountRepository;
+import com.example.bankclientbasic.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
-public class CustomerService implements GeneralService<Customer>{
+public class CustomerService implements GeneralService<Customer> {
+
+    private final CustomerRepository customerRepository;
+    private final AccountRepository accountRepository;
+    private final MapperFromAndToDTOs mapper;
 
     @Autowired
-    private CustomerDao customerDao;
-
-    @Autowired
-    private AccountDao accountDao;
+    public CustomerService(CustomerRepository customerRepository,
+                           AccountRepository accountRepository,
+                           MapperFromAndToDTOs mapper) {
+        this.customerRepository = customerRepository;
+        this.accountRepository = accountRepository;
+        this.mapper = mapper;
+    }
 
     @Override
     public Customer save(Customer obj) {
-        return customerDao.save(obj);
+        if (obj.getCreatedDate() == null) {
+            obj.setCreatedDate(ZonedDateTime.now());
+        }
+        obj.setLastModifiedDate(ZonedDateTime.now());
+        return customerRepository.save(obj);
     }
 
     @Override
     public boolean delete(Customer obj) {
-        return customerDao.delete(obj);
+        customerRepository.delete(obj);
+        return true;
     }
 
     @Override
     public void deleteAll(List<Customer> entities) {
-        customerDao.deleteAll(entities);
+        customerRepository.deleteAll(entities);
     }
 
     @Override
     public void saveAll(List<Customer> entities) {
-        customerDao.saveAll(entities);
+        customerRepository.saveAll(entities);
     }
 
     @Override
     public List<Customer> getAll() {
-        return customerDao.findAll();
+        return (List<Customer>) customerRepository.findAll();
     }
 
     @Override
     public boolean deleteById(long id) {
-        return customerDao.deleteById(id);
+        customerRepository.deleteById(id);
+        return true;
     }
 
     @Override
     public Customer getById(long id) {
-        return customerDao.getOne(id);
+        return customerRepository.findById(id)
+                .orElseThrow(RuntimeException::new);
     }
 
-    public Customer updatePersonalData(Customer incomingCustomer) {
-        return customerDao.updateExisting(incomingCustomer);
+    public Customer updateExisting(Customer updatedCustomer) {
+        Customer existingCustomer = customerRepository.findById(updatedCustomer.getId())
+                .orElseThrow(RuntimeException::new);
+        updateExistingCustomerFields(updatedCustomer, existingCustomer);
+        return customerRepository.save(existingCustomer);
     }
 
-    public void createAccount(int customerId, String currency) {
-        Customer newAccountOwner = customerDao.getOne(customerId);
-        Account newAccount = new Account(Currency.valueOf(currency), newAccountOwner);
-        newAccountOwner.getAccounts().add(newAccount);
-
-        customerDao.updateExisting(newAccountOwner);
+    public void createAccount(int customerId, AccountRequestDto dto) {
+        Customer newAccountOwner = getById(customerId);
+        Account newAccount = new Account(dto.getCurrency(), newAccountOwner, dto.getBalance());
+        accountRepository.save(newAccount);
     }
 
-    public void closeAccount(int customerId, int accountId) {
-        Customer customer = customerDao.getOne(customerId);
-        Account accountToClose = accountDao.getOne(accountId);
-        customer.getAccounts().remove(accountToClose);
+    public void closeAccount(int customerId, String accountNumber) {
+        Account account = accountRepository.findAccountsByNumber(accountNumber)
+                .orElseThrow(RuntimeException::new);
+        accountRepository.deleteById(account.getId());
+    }
 
-        customerDao.updateExisting(customer);
+    public CustomerResponseDto getCustomerResponseDtoById(long id) {
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(RuntimeException::new);
+        return mapper.toCustomerDto(customer);
+    }
+
+    public List<CustomerResponseDto> getAllCustomerResponseDTOs() {
+        List<Customer> allCustomers = getAll();
+        return allCustomers.stream()
+                .map(mapper::toCustomerDto)
+                .collect(Collectors.toList());
+    }
+
+    public Page<CustomerResponseDto> getAllCustomerResponseDTOs(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Customer> allCustomers =  customerRepository.findAll(pageable);
+        return allCustomers.map(mapper::toCustomerDto);
+    }
+
+    public CustomerResponseDto createCustomer(CustomerRequestDto dto) {
+        Customer customer = mapper.toCustomerEntity(dto);
+        save(customer);
+        return mapper.toCustomerDto(customer);
+    }
+
+    public CustomerResponseDto updateCustomerPersonalData(CustomerRequestDto dto) {
+        Customer updatedCustomer = mapper.toCustomerEntity(dto);
+        Customer existingCustomer = customerRepository
+                .findCustomersByNameAndEmail(dto.getName(), dto.getEmail())
+                .orElseThrow(RuntimeException::new);
+        updateExistingCustomerFields(updatedCustomer, existingCustomer);
+        save(existingCustomer);
+        return mapper.toCustomerDto(existingCustomer);
+    }
+
+    private void updateExistingCustomerFields(Customer updatedCustomer, Customer existingCustomer) {
+        existingCustomer.setCreatedDate(existingCustomer.getCreatedDate());
+        existingCustomer.setLastModifiedDate(ZonedDateTime.now());
+        existingCustomer.setName(updatedCustomer.getName());
+        existingCustomer.setEmail(updatedCustomer.getEmail());
+        existingCustomer.setAge(updatedCustomer.getAge());
+        existingCustomer.setPassword(updatedCustomer.getPassword());
+        existingCustomer.setPhoneNumber(updatedCustomer.getPhoneNumber());
     }
 }
 

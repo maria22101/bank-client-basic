@@ -1,107 +1,120 @@
 package com.example.bankclientbasic.service;
 
+import com.example.bankclientbasic.dto.AccountResponseDto;
+import com.example.bankclientbasic.mapper.MapperFromAndToDTOs;
 import com.example.bankclientbasic.model.Account;
-import com.example.bankclientbasic.model.Customer;
-import com.example.bankclientbasic.repository.AccountDao;
-import com.example.bankclientbasic.repository.CustomerDao;
+import com.example.bankclientbasic.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class AccountService implements GeneralService<Account> {
 
     @Autowired
-    private AccountDao accountDao;
+    private AccountRepository accountRepository;
+
+    @Autowired
+    private MapperFromAndToDTOs mapper;
 
     @Override
     public Account save(Account obj) {
-        return accountDao.save(obj);
+        return accountRepository.save(obj);
     }
 
     @Override
     public boolean delete(Account obj) {
-        return accountDao.delete(obj);
+        accountRepository.delete(obj);
+        return true;
     }
 
     @Override
     public void deleteAll(List<Account> entities) {
-        accountDao.deleteAll(entities);
+        accountRepository.deleteAll(entities);
     }
 
     @Override
     public void saveAll(List<Account> entities) {
-        accountDao.saveAll(entities);
+        accountRepository.saveAll(entities);
     }
 
     @Override
     public List<Account> getAll() {
-        return accountDao.findAll();
+        return (List<Account>)accountRepository.findAll();
     }
 
     @Override
     public boolean deleteById(long id) {
-        return accountDao.deleteById(id);
+        accountRepository.deleteById(id);
+        return true;
     }
 
     @Override
     public Account getById(long id) {
-        return accountDao.getOne(id);
+        return accountRepository.findById(id)
+                .orElseThrow(RuntimeException::new);
     }
 
     public Account addSum(String accountNumber, Double sum) {
-        Account account = getAccountByNumber(accountNumber)
+        Account account = accountRepository.findAccountsByNumber(accountNumber)
                 .orElseThrow(RuntimeException::new);
         Double currentBalance = account.getBalance();
         Double newBalance = currentBalance == null ? sum : (currentBalance + sum);
         account.setBalance(newBalance);
-        return accountDao.updateExisting(account);
+        return accountRepository.save(account);
     }
 
     public Account withdrawSum(String accountNumber, Double sum) {
-        Account account = getAccountByNumber(accountNumber)
+        Account account = accountRepository.findAccountsByNumber(accountNumber)
                 .orElseThrow(RuntimeException::new);
         Double currentBalance = account.getBalance();
 
         if (currentBalance > sum) {
             Double newBalance = currentBalance - sum;
             account.setBalance(newBalance);
-            return accountDao.updateExisting(account);
+            return accountRepository.save(account);
 
         } else {
             throw new RuntimeException();
         }
     }
 
+    @Transactional
     public void transferBetweenAccounts(String accountNumberFrom,
                                         String accountNumberTo,
                                         Double sum) {
 
-        Account accountFrom = getAccountByNumber(accountNumberFrom)
+        Account accountFrom = accountRepository.findAccountsByNumber(accountNumberFrom)
                 .orElseThrow(RuntimeException::new);
-        Account accountTo = getAccountByNumber(accountNumberTo)
+        Account accountTo = accountRepository.findAccountsByNumber(accountNumberTo)
                 .orElseThrow(RuntimeException::new);
         Double accountFromBalance = accountFrom.getBalance();
         Double accountToBalance = accountTo.getBalance();
 
         if (accountFromBalance > sum) {
-            accountFrom.setBalance(accountFromBalance - sum);
-            accountTo.setBalance(accountToBalance + sum);
-            accountDao.updateExisting(accountFrom);
-            accountDao.updateExisting(accountTo);
+            Double accountFromNewBalance = accountFromBalance - sum;
+            Double accountToNewBalance = accountToBalance == null ? sum : (accountToBalance + sum);
+            accountFrom.setBalance(accountFromNewBalance);
+            accountTo.setBalance(accountToNewBalance);
+            accountRepository.save(accountFrom);
+            accountRepository.save(accountTo);
 
         } else {
             throw new RuntimeException();
         }
     }
 
-    private Optional<Account> getAccountByNumber(String accountNumber) {
-        return accountDao.findAll()
-                .stream()
-                .filter(a -> a.getNumber().equals(accountNumber))
-                .findFirst();
+    public AccountResponseDto addSumToAccountNumber(String number, Double sum) {
+        Account account = addSum(number, sum);
+        return mapper.toAccountDto(account);
+    }
+
+    public AccountResponseDto withdrawSumFromAccountByNumber(String number, Double sum) {
+        Account account = withdrawSum(number, sum);
+        return mapper.toAccountDto(account);
     }
 }
+
 

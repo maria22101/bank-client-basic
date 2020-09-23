@@ -1,10 +1,18 @@
 package com.example.bankclientbasic.model;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
+import java.time.ZonedDateTime;
 
+@Getter
+@Setter
+@ToString
 @MappedSuperclass
 public class AbstractEntity {
 
@@ -12,12 +20,9 @@ public class AbstractEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    public Long getId() {
-        return id;
-    }
+    private ZonedDateTime createdDate;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    private ZonedDateTime lastModifiedDate;
 }
+
 
